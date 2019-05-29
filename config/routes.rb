@@ -3,5 +3,7 @@ Rails.application.routes.draw do
 
   get "ping", to: 'application#ping'
 
+  resources :classifieds, only: [:index, :show]
+
 
 end
