@@ -1,6 +1,24 @@
 require 'rails_helper'
 
 RSpec.describe "Classifieds", type: :request do
+
+  describe "GET /classifieds" do
+
+    before { 
+      FactoryGirl.create_list :classified, 3
+      get '/classifieds'
+     }
+
+    it 'works' do
+      expect(response).to be_success
+    end
+
+    it 'returns all the entries' do
+      expect(parsed_body.count).to eq Classified.all.count
+    end
+  end
+
+
   describe "GET /classifieds:/id" do
 
     let(:classified) { FactoryGirl.create :classified }
