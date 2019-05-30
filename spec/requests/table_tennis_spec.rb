@@ -16,15 +16,7 @@ RSpec.describe 'Table Tennis API', type: :request do
         end
 
         context 'when authenticated' do
-            let(:current_user) { FactoryGirl.create :user }
-            let(:auth_headers) {
-                token = Knock::AuthToken.new(payload: { sub: current_user.id} ).token
-                {
-                    'Authorization': "Bearer #{token}"
-                }
-            }
-
-            before { get '/ping', headers: auth_headers }    
+            before { get '/ping', headers: authentication_header }    
                 
             it 'works' do
                 expect(response).to be_success
