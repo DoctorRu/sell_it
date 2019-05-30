@@ -1,6 +1,4 @@
-class ApplicationController < ActionController::API
-
-    include  Knock::Authenticable
+class TableTennisController < ApplicationController
 
     def ping
 
