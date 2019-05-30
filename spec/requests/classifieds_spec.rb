@@ -17,6 +17,7 @@ RSpec.describe "Classifieds", type: :request do
       expect(parsed_body.count).to eq Classified.all.count
     end
   end
+  
 
 
   describe "GET /classifieds:/id" do
