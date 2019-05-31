@@ -38,4 +38,51 @@ RSpec.describe "Classifieds", type: :request do
     end
     
   end
+
+
+  describe 'POST /classifieds' do
+    context 'when unauthenticated' do
+      it 'returns unauthorized' do
+        post '/classifieds'
+        expect(response).to have_http_status :unauthorized
+
+      end
+    end
+
+    context 'when authenticated' do
+
+      let(:params) {
+        { classified: { title: 'title', price: 62, description: 'description'} }
+      }
+
+      it 'works' do
+        post '/classifieds', params: params, headers: authentication_header
+        expect(response).to have_http_status :created
+      end
+
+      it 'creates a new classiffied' do
+        expect {
+          post '/classifieds', params: params, headers: authentication_header
+        }.to change {
+          current_user.classifieds.count
+        }.by 1
+      end
+
+      it 'has correct fields values for the created classifed' do
+        post '/classifieds', params: params, headers: authentication_header
+        created_classified = current_user.classifieds.last
+        expect(created_classified.title).to eq 'title'
+        expect(created_classified.price).to eq 62
+        expect(created_classified.description).to eq 'description'
+      end
+
+      it 'returns a bad request when a parameter is missing' do
+        params[:classified].delete(:price)
+        post '/classifieds', params: params, headers: authentication_header
+        expect(response).to have_http_status :bad_request        
+      end
+
+    end
+    
+  end
 end
