@@ -22,17 +22,25 @@ RSpec.describe "Classifieds", type: :request do
 
 
   describe "GET /classifieds:/id" do   
-    before { get "/classifieds/#{classified.id}" }
 
-    it 'works' do
-      expect(response).to be_success
+    context 'when everything goes well' do
+      before { get "/classifieds/#{classified.id}" }
+
+      it 'works' do
+        expect(response).to be_success
+      end
+      
+      it 'is correctly serialized' do
+        expect(parsed_body['id']).to eq classified.id
+        expect(parsed_body['title']).to eq classified.title
+        expect(parsed_body['price']).to eq classified.price
+        expect(parsed_body['description']).to eq classified.description
+      end
     end
-    
-    it 'is correctly serialized' do
-      expect(parsed_body['id']).to eq classified.id
-      expect(parsed_body['title']).to eq classified.title
-      expect(parsed_body['price']).to eq classified.price
-      expect(parsed_body['description']).to eq classified.description
+
+    it 'returns not found when the resource can not be found' do
+      get '/classifieds/toto'
+      expect(response).to have_http_status :not_found
     end
     
   end
