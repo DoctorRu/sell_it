@@ -1,11 +1,9 @@
 Rails.application.routes.draw do
+
   post 'user_token' => 'user_token#create'
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
   get "ping", to: 'table_tennis#ping'
 
-
-  resources :classifieds, only: [:index, :show, :create]
-
+  resources :classifieds, only: [:index, :show, :create, :update, :destroy]
 
 end

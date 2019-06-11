@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "Classifieds", type: :request do
+  let(:classified) { FactoryGirl.create :classified, user_id: current_user.id }
 
   describe "GET /classifieds" do
 
@@ -20,10 +21,7 @@ RSpec.describe "Classifieds", type: :request do
   
 
 
-  describe "GET /classifieds:/id" do
-
-    let(:classified) { FactoryGirl.create :classified }
-    
+  describe "GET /classifieds:/id" do   
     before { get "/classifieds/#{classified.id}" }
 
     it 'works' do
@@ -84,5 +82,88 @@ RSpec.describe "Classifieds", type: :request do
 
     end
     
+  end 
+
+
+  describe 'PATCH /classified:id' do
+    context 'when unauthenticated' do
+      it 'returns unauthorized' do
+        patch "/classifieds/#{classified.id}"
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
+    context 'when authenticated' do
+      
+      let(:params) {
+        { classified: { title: 'A better title', price: 42} }
+      }
+
+      context 'when everything goes well' do
+        
+        before { patch  "/classifieds/#{classified.id}", params: params, headers: authentication_header }
+
+        it { expect(response).to be_success }
+
+        it 'modifies the given fields of the resource' do
+          modified_classified = Classified.find(classified.id)
+          expect(modified_classified.title).to eq 'A better title'
+          expect(modified_classified.price).to eq 42
+        end
+      end
+      
+      it 'returns a bad request when a parameter is malfored' do
+          params[:classified][:price] = 'its not a number dude!'
+          patch "/classifieds/#{classified.id}", params: params, headers: authentication_header   
+          expect(response).to have_http_status :bad_request
+      end
+
+      it 'return a not found when resource can not be found' do
+        patch '/classifieds/toto', params: params, headers: authentication_header
+        expect(response).to have_http_status :not_found
+      end
+
+      it 'returns a forbidden when the requester is not the owner of the resource' do
+        another_classified = FactoryGirl.create :classified
+        patch "/classifieds/#{another_classified.id}", params: params, headers: authentication_header
+        expect(response).to have_http_status :forbidden
+      end
+    end
   end
+
+  describe 'DELETE /classified:id' do
+    context 'when unauthenticated' do
+      it 'returns unauthorized' do
+        delete "/classifieds/#{classified.id}"
+        expect(response).to have_http_status :unauthorized
+      end
+    end
+
+    context 'when authenticated' do
+
+      context 'when everything goes well' do
+        before { delete "/classifieds/#{classified.id}", headers: authentication_header }
+        it { expect(response).to have_http_status :no_content }
+
+        it 'deletes the given classified' do
+          expect(Classified.find_by(id: classified.id)).to eq nil
+        end
+      end
+
+      it 'returns a not found when resource can not be found' do
+        delete "/classifieds/toto", headers: authentication_header
+        expect(response).to have_http_status :not_found
+      end
+
+      it 'returns a forbidden when the requester is not the owner of the resource' do
+        another_classified = FactoryGirl.create :classified
+        delete "/classifieds/#{another_classified.id}", headers: authentication_header
+        expect(response).to have_http_status :forbidden
+      end
+
+    end
+
+  end
+
+  
 end
