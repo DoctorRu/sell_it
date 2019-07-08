@@ -41,7 +41,7 @@ RSpec.describe "Classifieds", type: :request do
           price: classified.price,
           description: classified.description,
           user: {
-            id: classified.user.id,
+            id: classified.user.id,            
             fullname: classified.user.fullname
           }.stringify_keys
         }.stringify_keys)

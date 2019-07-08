@@ -4,7 +4,7 @@ class UsersController < ApplicationController
 
     def show
 
-        pp current_user
+        # pp current_user
         render json: current_user
     end
 end
