@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'pp'
 
 RSpec.describe "Classifieds", type: :request do
   let(:classified) { FactoryGirl.create :classified, user_id: current_user.id }
@@ -31,6 +32,21 @@ RSpec.describe "Classifieds", type: :request do
       end
       
       it 'is correctly serialized' do
+
+        # pp parsed_body
+
+        expect(parsed_body).to match({
+          id: classified.id,
+          title: classified.title,
+          price: classified.price,
+          description: classified.description,
+          user: {
+            id: classified.user.id,
+            fullname: classified.user.fullname
+          }.stringify_keys
+        }.stringify_keys)
+
+
         expect(parsed_body['id']).to eq classified.id
         expect(parsed_body['title']).to eq classified.title
         expect(parsed_body['price']).to eq classified.price
