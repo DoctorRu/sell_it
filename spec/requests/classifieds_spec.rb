@@ -6,17 +6,20 @@ RSpec.describe "Classifieds", type: :request do
 
   describe "GET /classifieds" do
 
+    let(:page) { 3 }
+    let(:per_page) { 5 }
+
     before { 
-      FactoryGirl.create_list :classified, 3
-      get '/classifieds'
+      FactoryGirl.create_list :classified, 18
+      get '/classifieds', params: { page: page, per_page: per_page}
      }
 
     it 'works' do
       expect(response).to be_success
     end
 
-    it 'returns all the entries' do
-      expect(parsed_body.count).to eq Classified.all.count
+    it 'returns paginated results' do
+      expect(parsed_body.map { |c| c['id'] }).to eq [11, 12, 13, 14, 15]
     end
   end
   

@@ -29,8 +29,13 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'knock'
 
 
-# Serializer
+# Serialization
 gem 'active_model_serializers', '~> 0.10.2'
+
+# Pagination
+
+gem 'kaminari', '~> 0.17.0'
+gem 'api-pagination', '~> 4.8', '>= 4.8.2'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

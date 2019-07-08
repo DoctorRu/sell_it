@@ -5,7 +5,7 @@ class ClassifiedsController < ApplicationController
     before_action :check_authorization, only: [:update, :destroy]
 
     def index
-        render json: Classified.all
+        paginate json: Classified.all
     end
 
     def show
