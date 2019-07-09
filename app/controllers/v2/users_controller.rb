@@ -1,3 +1,3 @@
-class V2::ClassifiedsController < V1::ClassifiedsController
+class V2::UsersController < V1::UsersController
     
 end
