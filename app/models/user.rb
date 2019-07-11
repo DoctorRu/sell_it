@@ -3,7 +3,7 @@ class User < ApplicationRecord
 
     has_many :classifieds
 
-    validates_presence_of :fullname, :username, :password_digest
+    validates_presence_of :firstname, :lastname, :username, :password_digest
     validates_uniqueness_of :username
 
     def self.from_token_request(request)

@@ -1,5 +1,5 @@
 class V1::ClassifiedSerializer::UserSerializer < ActiveModel::Serializer
-  attributes :id, :fullname
+  attributes :id
 
   # has_many :classifieds
 end

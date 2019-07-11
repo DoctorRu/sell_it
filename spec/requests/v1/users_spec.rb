@@ -9,8 +9,7 @@ RSpec.describe 'Users API', type: :request do
         it 'is correctly serialized' do
             expect(parsed_body).to match({
                 id: current_user.id,
-                username: current_user.username,
-                fullname: current_user.fullname,
+                username: current_user.username
             }.stringify_keys)
         end
 
