@@ -53,7 +53,8 @@ RSpec.describe "Classifieds", type: :request do
           price: classified.price,
           description: classified.description,
           user: {
-            id: classified.user.id
+            id: classified.user.id,
+            fullname: classified.user.fullname
           }.stringify_keys
         }.stringify_keys)
 
@@ -121,6 +122,11 @@ RSpec.describe "Classifieds", type: :request do
 
 
   describe 'PATCH /v2/classified:id' do
+    
+    let(:params) {
+      { classified: { title: 'A better title', price: 42} }
+    }
+
     context 'when unauthenticated' do
       it 'returns unauthorized' do
         patch "/v2/classifieds/#{classified.id}"
@@ -129,40 +135,8 @@ RSpec.describe "Classifieds", type: :request do
     end
 
     context 'when authenticated' do
-      
-      let(:params) {
-        { classified: { title: 'A better title', price: 42} }
-      }
-
-      context 'when everything goes well' do
-        
         before { patch  "/v2/classifieds/#{classified.id}", params: params, headers: authentication_header }
-
-        it { expect(response).to be_success }
-
-        it 'modifies the given fields of the resource' do
-          modified_classified = Classified.find(classified.id)
-          expect(modified_classified.title).to eq 'A better title'
-          expect(modified_classified.price).to eq 42
-        end
-      end
-      
-      it 'returns a bad request when a parameter is malfored' do
-          params[:classified][:price] = 'its not a number dude!'
-          patch "/v2/classifieds/#{classified.id}", params: params, headers: authentication_header   
-          expect(response).to have_http_status :bad_request
-      end
-
-      it 'return a not found when resource can not be found' do
-        patch '/v2/classifieds/toto', params: params, headers: authentication_header
-        expect(response).to have_http_status :not_found
-      end
-
-      it 'returns a forbidden when the requester is not the owner of the resource' do
-        another_classified = FactoryGirl.create :classified
-        patch "/v2/classifieds/#{another_classified.id}", params: params, headers: authentication_header
-        expect(response).to have_http_status :forbidden
-      end
+        it { expect(response).to have_http_status :forbidden }
     end
   end
 
