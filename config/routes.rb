@@ -5,8 +5,15 @@ Rails.application.routes.draw do
   get "ping", to: 'table_tennis#ping'
 
   concern :api_base do
-    resources :classifieds, only: [:index, :show, :create, :update, :destroy]
+    resources :classifieds, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        post 'publications' => 'classifieds#publish'
+      end
+    end
+    
     resources :users, only: [:show]
+
+
   end
 
 

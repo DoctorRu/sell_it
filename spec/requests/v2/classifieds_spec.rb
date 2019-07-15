@@ -5,34 +5,73 @@ RSpec.describe "Classifieds", type: :request do
   let(:classified) { FactoryGirl.create :classified, user_id: current_user.id }
 
   describe "GET /v2/classifieds" do
+    let(:page) { 3 } 
+    let(:per_page) { 5 }
 
     context "when everything is going well" do
-      let(:page) { 3 } 
-      let(:per_page) { 5 }
 
       before { 
-        FactoryGirl.create_list :classified, 18
-        get '/v2/classifieds', params: { page: page, per_page: per_page}
+        FactoryGirl.create_list :classified, 5, category: "vehicules"  
+        FactoryGirl.create_list :classified, 15, category: "accessories"
       }
 
         it 'works' do
+          get '/v2/classifieds', params: { page: page, per_page: per_page, order: 'asc'}
           expect(response).to have_http_status :partial_content
         end
 
-        it 'returns paginated results' do
-          expect(parsed_body.map { |c| c['id'] }).to eq Classified.all.limit(per_page).offset((page - 1) * per_page).pluck(:id)
+        it 'returns paginated results when order is asc' do
+          get '/v2/classifieds', params: { page: page, per_page: per_page, order: 'asc'}
+          expect(parsed_body.map { |c| c['id'] }).to eq Classified.order(created_at: :asc).limit(per_page).offset((page - 1) * per_page).pluck(:id)
         end
+
+        it 'returns paginated results when order is desc' do
+          get '/v2/classifieds', params: { page: page, per_page: per_page, order: 'desc'}
+          expect(parsed_body.map { |c| c['id'] }).to eq Classified.order(created_at: :desc).limit(per_page).offset((page - 1) * per_page).pluck(:id)
+        end
+
+        it 'returns categorized results when category parameter is given' do
+          get '/v2/classifieds', params: {page: page, per_page: per_page, order: 'asc', category: 'accessories'}
+          parsed_body.each { |classified| expect(classified['category']).to eq 'accessories'}
+        end
+
+        it 'returns the correct results when searching' do
+          classified_1 = FactoryGirl.create :classified, title: 'Gold jewels'
+          classified_2 = FactoryGirl.create :classified, title: 'Off road car'
+          classified_3 = FactoryGirl.create :classified, title: 'Great car, almostnew'
+
+          get "/v2/classifieds", params: {page: 1, per_page: 5, order: 'asc', q: 'car'}
+          expect(parsed_body.map { |classified| classified['id']}).to eq [classified_2.id, classified_3.id]
+
+        end
+1    end
+
+    it 'returns a bad request when page parameter is missing' do
+      get '/v2/classifieds', params: {per_page: per_page, order: 'asc'}
+      expect(response).to have_http_status :bad_request      
+      expect(parsed_body['error']).to eq 'missing parameter page'
     end
 
-    it 'returns a bad request when parameters are missing' do
-      get '/v2/classifieds'
+    it 'returns a bad request when per_page parameter is missing' do
+      get '/v2/classifieds', params: {page: page, order: 'asc'}
       expect(response).to have_http_status :bad_request
-      expect(parsed_body.keys).to include 'error'
-      expect(parsed_body['error']).to eq 'missing parameters'
+      expect(parsed_body['error']).to eq 'missing parameter per_page'
     end
+
+    it 'returns a bad request when order parameter is missing' do
+      get '/v2/classifieds', params: {page: page, per_page: per_page}
+      expect(response).to have_http_status :bad_request
+      expect(parsed_body['error']).to eq 'missing parameter order'
+    end
+
+    it 'returns a bad request when order parameter is invalid' do
+      get '/v2/classifieds', params: {page: page, per_page: per_page, order: 'trululu'}
+      expect(response).to have_http_status :bad_request
+      expect(parsed_body['error']).to eq 'Order parameter is invalid must be asc or desc'
+    end
+  
   end
   
-
 
   describe "GET /v2/classifieds:/id" do   
 
@@ -52,6 +91,7 @@ RSpec.describe "Classifieds", type: :request do
           title: classified.title,
           price: classified.price,
           description: classified.description,
+          category: classified.category,
           user: {
             id: classified.user.id,
             fullname: classified.user.fullname
@@ -72,7 +112,6 @@ RSpec.describe "Classifieds", type: :request do
     end
     
   end
-
 
   describe 'POST /v2/classifieds' do
     context 'when unauthenticated' do
@@ -139,6 +178,7 @@ RSpec.describe "Classifieds", type: :request do
         it { expect(response).to have_http_status :forbidden }
     end
   end
+
 
   describe 'DELETE /v2/classified:id' do
     context 'when unauthenticated' do
