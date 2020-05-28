@@ -34,7 +34,7 @@ gem 'active_model_serializers', '~> 0.10.2'
 
 # Pagination
 
-gem 'kaminari', '~> 0.17.0'
+gem 'kaminari', '~> 1.2.1'
 gem 'api-pagination', '~> 4.8', '>= 4.8.2'
 
 group :development, :test do
